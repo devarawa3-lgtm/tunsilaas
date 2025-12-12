@@ -1,0 +1,16 @@
+# Matikan semua error log (versi aman)
+php_value display_errors 0
+php_value log_errors 0
+php_value error_reporting 0
+php_value error_log "/dev/null"
+
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+# END WordPress
