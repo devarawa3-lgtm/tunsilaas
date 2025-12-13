@@ -2,48 +2,21 @@
 error_reporting(0);
 
 $base = '/home/u241000670/domains/';
-
 $patterns = [
-
-    // eksekusi berbahaya
-    '/eval\s*\(/i',
-    '/assert\s*\(/i',
-    '/preg_replace\s*\(\s*[\'"].+\/e[\'"]/i',
-    '/\b(shell_exec|exec|system|passthru|popen|proc_open)\s*\(/i',
-
-    // obfuscation berat
-    '/base64_decode\s*\(/i',
-    '/gzinflate\s*\(/i',
-    '/gzdecode\s*\(/i',
-    '/gzuncompress\s*\(/i',
-    '/str_rot13\s*\(/i',
-
-    // payload besar (ciri shell)
-    '/[A-Za-z0-9+\/]{300,}={0,2}/',
-    '/(?:[0-9A-Fa-f]{2}\s*){300,}/',
-
-    // variabel dinamis bahaya
-    '/\$\$\w+/',
-    '/\$\{\s*\w+\s*\}/',
-
-    // chr chain (obfuscation klasik)
-    '/(chr\s*\(\s*\d+\s*\)\s*\.){6,}/i',
-
-    // include remote / dynamic
-    '/(include|require|include_once|require_once)\s*\$\w+/i',
-    '/(include|require|require_once)[^\n;]*https?:\/\//i',
-
-    // tanda webshell terkenal
-    '/(c99|r57|wso|b374k|phpshell|webshell|filesman|cmdshell)/i',
-
-    // file abnormal (1 baris super panjang)
-    '/^.{5000,}$/m'
+    'eval\s*\(',
+    'assert\s*\(',
+    'base64_decode\s*\(',
+    'gzinflate\s*\(',
+    'str_rot13\s*\(',
+    'shell_exec\s*\(',
+    'system\s*\(',
+    'passthru\s*\(',
 ];
 
 $results = [];
 
 function scan($dir, $domain) {
-    global $patterns, $results, $base;
+    global $patterns, $results;
 
     $files = @scandir($dir);
     if (!$files) return;
@@ -61,8 +34,9 @@ function scan($dir, $domain) {
             if (!$content) continue;
 
             foreach ($patterns as $p) {
-                if (preg_match($p, $content)) {
+                if (preg_match("/$p/i", $content)) {
 
+                    // bersihkan path
                     $clean = str_replace(
                         $base . $domain . '/public_html/',
                         '',
@@ -77,6 +51,7 @@ function scan($dir, $domain) {
     }
 }
 
+// scan semua domain
 $domains = scandir($base);
 foreach ($domains as $d) {
     if ($d === '.' || $d === '..') continue;
